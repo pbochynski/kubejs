@@ -1,0 +1,32 @@
+name: OIDC Token Request
+
+on:
+  workflow_dispatch:
+    inputs:
+      service_url:
+        description: 'The external service URL'
+        required: true
+        default: 'https://example.com/api'
+
+jobs:
+  request-oidc-token:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get OIDC Token and Call External Service
+        id: oidc-token
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const serviceUrl = '${{ github.event.inputs.service_url }}';
+            const idToken = await github.rest.actions.getOidcToken();
+            const response = await fetch(serviceUrl, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${idToken.data.token}`
+              }
+            });
+            const data = await response.json();

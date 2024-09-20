@@ -18,6 +18,8 @@ app.set('serverTimeout', 30000);
 app.use(express.json());
 
 app.get('/', (req, res) => {
+  // log headers
+  console.log(req.headers);
   res.send('Hello World!');
 });
 
