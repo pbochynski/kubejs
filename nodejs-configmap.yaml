@@ -1,0 +1,51 @@
+apiVersion: v1
+data:
+  package.json: |-
+    {
+      "name": "hello-world-app",
+      "version": "1.0.0",
+      "main": "server.js",
+      "scripts": {
+        "start": "node server.js"
+      },
+      "dependencies": {
+        "express": "^4.17.1",
+        "multer": "^1.4.2",
+        "uuid": "^8.3.2",
+        "axios": "^0.21.1",
+        "form-data": "^4.0.0"
+      }
+    }
+  server.js: "const express = require('express');\nconst fs = require('fs');\nconst
+    path = require('path');\nconst multer = require('multer');\nconst { v4: uuidv4
+    } = require('uuid');\nconst axios = require('axios');\nconst stream = require('stream');\nconst
+    FormData = require('form-data');\nconst app = express();\nconst port = 3000;\n\nconsole.log(\"Starting
+    server...\");\nconst target = process.env.TARGET || 'localhost';\nconsole.log(`Target:
+    ${target}`); \nconst upload = multer({ dest: 'uploads/' });\n\napp.set('serverTimeout',
+    30000);\napp.use(express.json());\n\napp.get('/', (req, res) => {\n  res.send('Hello
+    World!');\n});\n\napp.post('/upload', upload.single('file'), (req, res) => {\n
+    \ const tempPath = req.file.path;\n  const targetPath = path.join(__dirname, 'uploads',
+    `${uuidv4()}.txt`);\n\n  fs.rename(tempPath, targetPath, err => {\n    if (err)
+    return res.sendStatus(500);\n    res.json({ resourceId: path.basename(targetPath)
+    });\n  });\n});\n\napp.get('/files/:id', (req, res) => {\n  const filePath = path.join(__dirname,
+    'uploads', req.params.id);\n\n  fs.readFile(filePath, 'utf8', (err, data) => {\n
+    \   if (err) return res.sendStatus(404);\n    res.send(data);\n  });\n});\n\napp.get('/test',
+    async (req, res) => {\n  // get number of lines from request query param\n  const
+    numLines = req.query.lines || 72; \n  console.log(`Generating ${numLines} lines`);\n
+    \ const form = new FormData();\n  const passThrough = new stream.PassThrough();\n\n
+    \ form.append('file', passThrough, {\n    filename: `${uuidv4()}.txt`,\n    contentType:
+    'text/plain'\n  });\n  axios.post(`http://${target}:3000/upload`, form, {\n    headers:
+    form.getHeaders()\n  })\n  .then(response => {\n    console.log('File uploaded
+    successfully', response.data);\n    res.json({ resourceId: response.data.resourceId
+    });\n  })\n  .catch(error => {\n    console.error(error); \n    res.status(500).send('Error
+    uploading file');\n  });\n  for (let i=0; i<numLines; i++) {\n    console.log(`Sending
+    line ${i+1} of ${numLines}`);\n    passThrough.write(`Sending line ${i+1} of ${numLines}`);\n
+    \   await new Promise(resolve => setTimeout(resolve, 5000)); // 5 seconds delay\n
+    \ }\n  console.log('Finished generating lines');\n  passThrough.end();\n  console.log('End
+    of test');\n});\n\nconst server = app.listen(port,'0.0.0.0', () => {\n  console.log(`Server
+    running on port ${port}`);\n});\n\n// Increase server timeout to 10 minutes.\nserver.requestTimeout
+    = 600000;"
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: nodejs-config

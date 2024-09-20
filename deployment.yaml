@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-deployment
+  labels:
+    app: nodejs-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nodejs-app
+  template:
+    metadata:
+      labels:
+        app: nodejs-app
+    spec:
+      containers:
+        - name: nodejs
+          image: node:22-alpine
+          command: ["sh", "-c"]
+          args:
+            - |
+              cp /usr/src/app-src/* /usr/src/app/ && \
+              cd /usr/src/app && \
+              npm install && \
+              npm start
+          ports:
+            - containerPort: 3000
+          env:
+            - name: TARGET
+              value: "nodejs-service.default"
+          volumeMounts:
+            - name: nodejs-config-volume
+              mountPath: /usr/src/app-src
+            - name: node-app-volume
+              mountPath: /usr/src/app
+      volumes:
+        - name: nodejs-config-volume
+          configMap:
+            name: nodejs-config
+        - name: node-app-volume
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodejs-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+  selector:
+    app: nodejs-app
