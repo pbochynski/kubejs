@@ -9,7 +9,7 @@ on:
         default: 'https://apiserver.example.com'
 
 jobs:
-  call-api:
+  deploy:
     runs-on: ubuntu-latest
     
     permissions:
