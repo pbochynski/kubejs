@@ -28,5 +28,5 @@ jobs:
                      | jq -r .value)
 
         # Use the OIDC token to call an external URL
-        curl -X POST ${{ github.event.inputs.service_url }} \
+        curl -X GET ${{ github.event.inputs.service_url }} \
         -H "Authorization: Bearer $TOKEN"
