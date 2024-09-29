@@ -5,14 +5,14 @@ metadata:
   labels:
     app: nodejs-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: nodejs-app
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 1  # Allows at most one pod to be unavailable during updates
+      maxUnavailable: 0  # Allows at most one pod to be unavailable during updates
       maxSurge: 1        # Allows one additional pod to be created during updates
   template:
     metadata:
@@ -38,8 +38,8 @@ spec:
             httpGet:
               path: /health
               port: 3000
-            initialDelaySeconds: 5  # Adjust based on your app's startup time
-            periodSeconds: 5
+            initialDelaySeconds: 2  # Adjust based on your app's startup time
+            periodSeconds: 1
             timeoutSeconds: 2
             failureThreshold: 3
           livenessProbe:

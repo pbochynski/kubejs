@@ -20,7 +20,7 @@ app.use(express.json());
 app.get('/', (req, res) => {
   // log headers
   console.log(req.headers);
-  res.send('Hello from github!');
+  res.send('Hello World!');
 });
 app.get('/health', (req, res) => {
   res.send('OK');
