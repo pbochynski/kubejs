@@ -1,12 +1,12 @@
-name: OIDC Token Request
+name: Deploy with OIDC token
 
 on:
   workflow_dispatch:
     inputs:
-      service_url:
-        description: 'The external service URL'
+      apiserver_url:
+        description: 'API server URL'
         required: true
-        default: 'https://example.com/api'
+        default: 'https://apiserver.example.com'
 
 jobs:
   call-api:
@@ -20,13 +20,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
     
-    - name: Get GitHub OIDC ID Token and Call API
+    - name: Generate kubeconfig
       run: |
         # Request the OIDC token from GitHub
         TOKEN=$(curl -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
                      "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=my-cluster" \
                      | jq -r .value)
-
-        # Use the OIDC token to call an external URL
-        curl -k -X GET ${{ github.event.inputs.service_url }} \
-        -H "Authorization: Bearer $TOKEN"
+        API_SERVER_URL=${{ github.event.inputs.apiserver_url }}        
+        ./gen-kubeconfig.sh        
+        cat kubeconfig.yaml
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl get namespace --kubeconfig kubeconfig.yaml
