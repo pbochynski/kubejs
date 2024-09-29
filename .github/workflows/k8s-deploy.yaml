@@ -29,10 +29,12 @@ jobs:
         export TOKEN=$(curl -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
                      "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=my-cluster" \
                      | jq -r .value)
-        export API_SERVER_URL=${{ github.event.inputs.apiserver_url }} 
-        if [ -z "$API_SERVER_URL" ]; then
-          # if the API server URL is not provided, the workflow will use secret API_SERVER_URL 
-          export API_SERVER_URL= ${{ secrets.API_SERVER_URL }}
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          # Use the input parameter for workflow_dispatch
+          export API_SERVER_URL="${{ github.event.inputs.apiserver_url }}"
+        elif [ "${{ github.event_name }}" == "push" ]; then
+          # Use the GitHub secret for push event
+          export API_SERVER_URL="${{ secrets.API_SERVER_URL }}"
         fi
         ./gen-kubeconfig.sh        
         cat kubeconfig.yaml
