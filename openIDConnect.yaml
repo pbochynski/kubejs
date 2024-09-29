@@ -1,0 +1,29 @@
+apiVersion: authentication.gardener.cloud/v1alpha1
+kind: OpenIDConnect
+metadata:
+  name: github
+spec:
+  # issuerURL is the URL the provider signs ID Tokens as.
+  # This will be the "iss" field of all tokens produced by the provider and is used for configuration discovery.
+  issuerURL: https://token.actions.githubusercontent.com
+
+  # clientID is the audience for which the JWT must be issued for, the "aud" field.
+  clientID: my-cluster
+
+  # usernameClaim is the JWT field to use as the user's username.
+  usernameClaim: sub
+  usernamePrefix: "github:"
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: oidc-cluster-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: github:repo:pbochynski/kubejs:ref:refs/heads/main

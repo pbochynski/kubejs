@@ -24,9 +24,9 @@ jobs:
       run: |
         # Request the OIDC token from GitHub
         TOKEN=$(curl -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-                     "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://your-external-api.com" \
+                     "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=my-cluster" \
                      | jq -r .value)
 
         # Use the OIDC token to call an external URL
-        curl -X GET ${{ github.event.inputs.service_url }} \
+        curl -k -X GET ${{ github.event.inputs.service_url }} \
         -H "Authorization: Bearer $TOKEN"
