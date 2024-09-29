@@ -22,6 +22,9 @@ app.get('/', (req, res) => {
   console.log(req.headers);
   res.send('Hello from github!');
 });
+app.get('/health', (req, res) => {
+  res.send('OK');
+})
 
 app.post('/upload', upload.single('file'), (req, res) => {
   const tempPath = req.file.path;

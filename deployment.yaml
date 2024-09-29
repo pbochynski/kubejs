@@ -34,6 +34,22 @@ spec:
           env:
             - name: TARGET
               value: "nodejs-service.default"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5  # Adjust based on your app's startup time
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10  # Typically longer than readiness probe
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 3
           volumeMounts:
             - name: nodejs-config-volume
               mountPath: /usr/src/app-src
