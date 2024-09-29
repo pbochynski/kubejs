@@ -20,7 +20,7 @@ app.use(express.json());
 app.get('/', (req, res) => {
   // log headers
   console.log(req.headers);
-  res.send('Hello world!');
+  res.send('Hello from github!');
 });
 
 app.post('/upload', upload.single('file'), (req, res) => {
