@@ -9,24 +9,24 @@ on:
         default: 'https://example.com/api'
 
 jobs:
-  request-oidc-token:
+  call-api:
     runs-on: ubuntu-latest
+    
+    permissions:
+      # Necessary for requesting the ID token
+      id-token: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Get GitHub OIDC ID Token and Call API
+      run: |
+        # Request the OIDC token from GitHub
+        TOKEN=$(curl -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+                     "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://your-external-api.com" \
+                     | jq -r .value)
 
-      - name: Get OIDC Token and Call External Service
-        id: oidc-token
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const serviceUrl = '${{ github.event.inputs.service_url }}';
-            const idToken = await github.rest.actions.getOidcToken();
-            const response = await fetch(serviceUrl, {
-              method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${idToken.data.token}`
-              }
-            });
-            const data = await response.json();
+        # Use the OIDC token to call an external URL
+        curl -X POST ${{ github.event.inputs.service_url }} \
+        -H "Authorization: Bearer $TOKEN"

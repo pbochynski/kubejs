@@ -17,3 +17,6 @@ fi
 
 # Create the ConfigMap
 kubectl create configmap nodejs-config --from-file=server.js="$SERVER_JS_PATH" --from-file=package.json="$PACKAGE_JSON_PATH" --dry-run=client -o yaml | kubectl apply -f -
+
+# Restart the Deployment
+kubectl rollout restart deployment nodejs-deployment
