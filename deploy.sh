@@ -15,6 +15,9 @@ if [[ ! -f "$PACKAGE_JSON_PATH" ]]; then
   exit 1
 fi
 
+# Create the Deployment
+kubectl apply -f deployment.yaml
+
 # Create the ConfigMap
 kubectl create configmap nodejs-config --from-file=server.js="$SERVER_JS_PATH" --from-file=package.json="$PACKAGE_JSON_PATH" --dry-run=client -o yaml | kubectl apply -f -
 
